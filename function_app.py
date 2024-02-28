@@ -36,7 +36,8 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
 
     for media in get_initial_data.get('media', {}).get('data', []):
         post_id = media.get('id')
-        comments_data = extract_comments(post_id)
+        comments_data = extract_comments(post_id, 'comments_count,comments{text,media,from,like_count,timestamp}')
+
         comments_count = comments_data.get('comments_count', 0)
 
         if comments_count < 0 or comments_data.get('comments') is None:
@@ -58,10 +59,10 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
 
         while len(comments_pagination.keys()) > 0:
             comments_after = comments_pagination.get('cursors', {}).get('after', {})
-            get_comments_next = extract_comments(post_id, comments_after)
+            get_comments_next = extract_comments(f'{post_id}/comments', 'id,like_count,media,from,timestamp', comments_after)
             comments_count = get_comments_next.get('comments_count', 0)
 
-            if comments_count < 0 or get_comments_next.get('comments') is None:
+            if get_comments_next.get('comments', {}).get('paging', {}) is None:
                 continue
 
             comments_pagination = get_comments_next.get('comments', {}).get('paging', {})
@@ -77,5 +78,6 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
                     "user_id": comment.get("from", {}).get("id"),
                     "post_id": comment["id"],
                 })
+    # print(all_comments)
 
     send_to_eventhub(all_comments)
