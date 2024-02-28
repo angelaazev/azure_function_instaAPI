@@ -20,8 +20,8 @@ def get_instagram_data(_id, fields, after_pag = None):
     return response.json()
 
 
-def extract_comments(post_id, after_pag = None):
-    data = get_instagram_data(_id=post_id, fields='comments_count,comments{text,media,from,like_count,timestamp}', after_pag=after_pag)
+def extract_comments(post_id, fields, after_pag = None):
+    data = get_instagram_data(_id=post_id, fields=fields, after_pag=after_pag)
     return data
 
 
